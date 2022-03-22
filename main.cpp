@@ -39,7 +39,7 @@ int main() {
 
 	//Runs once for every character in the Brainfuck file
 	for(int i=0; i<charCount; ++i) {
-		
+
 		//Runs command based on the current character
 		switch (chars[i]) {
 			case '<':
@@ -55,17 +55,22 @@ int main() {
 				memArr[pointerPos]++;
 				break;
 			default:
-				continue;
+				break;
 		}
 
 		//Prints the whole memory array
 		for(int i=0; i<memArrSize; i++) {
 			cout << memArr[i] << " ";
 		}
-		
-		cout << endl;
-		
-	}
 
+		cout << endl;
+
+		//Prints pointer position
+		for(int i=0; i<pointerPos; i++) {
+			cout << "  ";
+		}
+
+		cout << "^" << endl;	
+	}
 }
 
