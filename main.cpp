@@ -1,7 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <unistd.h>
 using namespace std;
+
+void callLoop(char *chars, int *memArr, int *memArrSizeP, int *charPosP, int *pointerPosP);
+void backendPrint(int memArr, int memArrSize, int pointerPos);
 
 int main() {
 
@@ -38,10 +42,10 @@ int main() {
 	}
 
 	//Runs once for every character in the Brainfuck file
-	for(int i=0; i<charCount; ++i) {
+	for(int charPos=0; charPos<charCount; ++charPos) {
 
 		//Runs command based on the current character
-		switch (chars[i]) {
+		switch(chars[charPos]) {
 			case '<':
 				pointerPos--;
 				break;
@@ -53,6 +57,12 @@ int main() {
 				break;
 			case '+':
 				memArr[pointerPos]++;
+				break;
+			case '[':
+				callLoop(chars, memArr, &memArrSize, &charPos, &pointerPos);
+				break;
+			case ']':
+				cout << "Invalid operation, not in loop" << endl;
 				break;
 			default:
 				break;
@@ -70,7 +80,76 @@ int main() {
 			cout << "  ";
 		}
 
-		cout << "^" << endl;	
+		cout << "^" << endl;
+
+		usleep(100000);
 	}
 }
 
+//Function for calling a new loop
+void callLoop(char *chars, int *memArr, int *memArrSizeP, int *charPosP, int *pointerPosP) {
+	
+	bool inLoop = true;
+	int loopLen = 0;
+
+	//Declaring variables from pointers
+	int &memArrSize = *memArrSizeP,
+		&charPos = *charPosP,
+		&pointerPos = *pointerPosP;
+
+	while(inLoop) {
+
+		charPos++;
+
+		//Runs command based on the current character
+		switch(chars[charPos]) {
+			case '<':
+				pointerPos--;
+				loopLen++;
+				break;
+			case '>':
+				pointerPos++;
+				loopLen++;
+				break;
+			case '-':
+				memArr[pointerPos]--;
+				loopLen++;
+				break;
+			case '+':
+				memArr[pointerPos]++;
+				loopLen++;
+				break;
+			case '[':
+				callLoop(chars, memArr, &memArrSize, &charPos, &pointerPos);
+				break;
+			case ']':
+				if(memArr[pointerPos] > 0) {
+					charPos -= ++loopLen;
+					loopLen = 0;
+				}
+				else {
+					inLoop = false;
+					//cout << "not in loop" << endl;
+				}
+				break;
+			default:
+				break;
+		}
+
+		//Prints the whole memory array
+		for(int i=0; i<memArrSize; i++) {
+			cout << memArr[i] << " ";
+		}
+
+		cout << endl;
+
+		//Prints pointer position
+		for(int i=0; i<pointerPos; i++) {
+			cout << "  ";
+		}
+
+		cout << "^" << endl;
+
+		usleep(100000);
+	}
+}
