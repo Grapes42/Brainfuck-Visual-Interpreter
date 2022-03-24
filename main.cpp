@@ -5,6 +5,7 @@
 using namespace std;
 
 int callLoop(char *chars, int *memArr, int *memArrSizeP, int *charPosP, int *pointerPosP, int timeDel);
+void backendPrint(int *memArr, int *memArrSizeP, int *pointerPosP);
 
 int main() {
 
@@ -70,19 +71,7 @@ int main() {
 				break;
 		}
 
-		//Prints the whole memory array
-		for(int i=0; i<memArrSize; i++) {
-			cout << memArr[i] << " ";
-		}
-
-		cout << endl;
-
-		//Prints pointer position
-		for(int i=0; i<pointerPos; i++) {
-			cout << "  ";
-		}
-
-		cout << "^" << endl;
+		backendPrint(memArr, &memArrSize, &pointerPos);
 
 		usleep(timeDel);
 	}
@@ -140,22 +129,36 @@ int callLoop(char *chars, int *memArr, int *memArrSizeP, int *charPosP, int *poi
 				break;
 		}
 
-		//Prints the whole memory array
-		for(int i=0; i<memArrSize; i++) {
-			cout << memArr[i] << " ";
-		}
-
-		cout << endl;
-
-		//Prints pointer position
-		for(int i=0; i<pointerPos; i++) {
-			cout << "  ";
-		}
-
-		cout << "^" << endl;
+		backendPrint(memArr, &memArrSize, &pointerPos);
 
 		usleep(timeDel);
 	}
 
 	return loopLen;
+}
+
+void backendPrint(int *memArr, int *memArrSizeP, int *pointerPosP) {
+
+	int &memArrSize = *memArrSizeP,
+		&pointerPos = *pointerPosP;
+
+	//Prints the whole memory array
+	for(int i=0; i<memArrSize; i++) {
+		cout << memArr[i] << " ";
+	}
+
+	cout << endl;
+
+	//Prints pointer position
+	for(int i=0; i<pointerPos; i++) {		
+
+		//Correction for multiple digit numbers
+		for(int j=10; j<memArr[i]; j*= 10) {
+			cout << " ";
+		}
+
+		cout << "  ";
+	}
+
+	cout << "^" << endl;
 }
