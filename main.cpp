@@ -4,10 +4,12 @@
 #include <unistd.h>
 using namespace std;
 
-void callLoop(char *chars, int *memArr, int *memArrSizeP, int *charPosP, int *pointerPosP);
-void backendPrint(int memArr, int memArrSize, int pointerPos);
+int callLoop(char *chars, int *memArr, int *memArrSizeP, int *charPosP, int *pointerPosP, int timeDel);
 
 int main() {
+
+	//Time delay between printing
+	int timeDel = 100000;
 
 	//User selection of *.bf file
 	string brainFuckFile;
@@ -59,7 +61,7 @@ int main() {
 				memArr[pointerPos]++;
 				break;
 			case '[':
-				callLoop(chars, memArr, &memArrSize, &charPos, &pointerPos);
+				callLoop(chars, memArr, &memArrSize, &charPos, &pointerPos, timeDel);
 				break;
 			case ']':
 				cout << "Invalid operation, not in loop" << endl;
@@ -82,12 +84,12 @@ int main() {
 
 		cout << "^" << endl;
 
-		usleep(100000);
+		usleep(timeDel);
 	}
 }
 
 //Function for calling a new loop
-void callLoop(char *chars, int *memArr, int *memArrSizeP, int *charPosP, int *pointerPosP) {
+int callLoop(char *chars, int *memArr, int *memArrSizeP, int *charPosP, int *pointerPosP, int timeDel) {
 	
 	bool inLoop = true;
 	int loopLen = 0;
@@ -99,6 +101,7 @@ void callLoop(char *chars, int *memArr, int *memArrSizeP, int *charPosP, int *po
 
 	while(inLoop) {
 
+		int subLoopLen;
 		charPos++;
 
 		//Runs command based on the current character
@@ -120,7 +123,8 @@ void callLoop(char *chars, int *memArr, int *memArrSizeP, int *charPosP, int *po
 				loopLen++;
 				break;
 			case '[':
-				callLoop(chars, memArr, &memArrSize, &charPos, &pointerPos);
+				subLoopLen = callLoop(chars, memArr, &memArrSize, &charPos, &pointerPos, timeDel); 
+				loopLen += subLoopLen+2;
 				break;
 			case ']':
 				if(memArr[pointerPos] > 0) {
@@ -150,6 +154,8 @@ void callLoop(char *chars, int *memArr, int *memArrSizeP, int *charPosP, int *po
 
 		cout << "^" << endl;
 
-		usleep(100000);
+		usleep(timeDel);
 	}
+
+	return loopLen;
 }
