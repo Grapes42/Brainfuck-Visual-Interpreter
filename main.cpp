@@ -4,161 +4,173 @@
 #include <unistd.h>
 using namespace std;
 
-int callLoop(char *chars, int *memArr, int *memArrSizeP, int *charPosP, int *pointerPosP, int timeDel);
-void backendPrint(int *memArr, int *memArrSizeP, int *pointerPosP);
+// Declaring functions [
+
+int callLoop();
+void charConditional(bool *inLoop, int *loopLen);
+void backendPrint();
+
+// ] Declaring functions
+
+
+// Declaring global variables [
+
+// Creates character array [
+char chars[100];
+int charPos, charCount;
+// ] Creates character array
+
+// Creates memory cell array [
+int const memArrSize = 10;
+int memArr[memArrSize];
+// ] Creates memory cell array
+
+// Other setup [
+int pointerPos = 0;
+int const timeDel = 100000;
+// ] Other setup
+
+// ] Declaring global variables
 
 int main() {
 
-	//Time delay between printing
-	int timeDel = 100000;
-
-	//User selection of *.bf file
+    // User selection of *.bf file [
 	string brainFuckFile;
 	cout << "Input file: ";
 	cin >> brainFuckFile;
 	cout << endl;
+    // ] User selection of *.bf file
 
-	//Get *.bf file into string
+    // Get *.bf file into string [
 	ifstream in(brainFuckFile);
 	string contents((istreambuf_iterator<char>(in)), 
     istreambuf_iterator<char>());
+    // ] Get *.bf file into string
 
-	//Gets number of characters for character array
-	int charCount = contents.length();
-	char chars[charCount];
+    // Gets number of characters for character array [
+	charCount = contents.length();
+    // ] Gets number of characters for character array
 
-	//Convert string into character array
+    // Convert string into character array [
 	for(int i=0; i<charCount; i++) {
 		chars[i] = contents.c_str()[i];
 	}
+    // ] Convert string into character array
 
-	//Creates array of memory cells
-	int memArrSize = 10;
-	int memArr[memArrSize];
-
-	//Sets the pointer position to 0
-	int pointerPos = 0;
-	
-	//Zeros the memory cell array
+    // Zeros the memory cell array [
 	for(int i=0; i<memArrSize; i++) {
 		memArr[i] = 0;
 	}
+    // Zeros the memory cell array
 
-	//Runs once for every character in the Brainfuck file
-	for(int charPos=0; charPos<charCount; ++charPos) {
+    // Place holder values [
+    bool inLoop = false;
+    int loopLen = 0;
+    // ] Place holder values
 
-		//Runs command based on the current character
-		switch(chars[charPos]) {
-			case '<':
-				pointerPos--;
-				break;
-			case '>':
-				pointerPos++;
-				break;
-			case '-':
-				memArr[pointerPos]--;
-				break;
-			case '+':
-				memArr[pointerPos]++;
-				break;
-			case '[':
-				callLoop(chars, memArr, &memArrSize, &charPos, &pointerPos, timeDel);
-				break;
-			case ']':
-				cout << "Invalid operation, not in loop" << endl;
-				break;
-			default:
-				break;
-		}
+    // Runs once for every character in the brainfuck file [
+    for(charPos=0; charPos<charCount; ++charPos) {
 
-		backendPrint(memArr, &memArrSize, &pointerPos);
+        charConditional(&inLoop, &loopLen);
 
-		usleep(timeDel);
-	}
+        backendPrint();
+
+    }
+    // ] Runs once for every character in the brainfuck file
+
 }
 
-//Function for calling a new loop
-int callLoop(char *chars, int *memArr, int *memArrSizeP, int *charPosP, int *pointerPosP, int timeDel) {
-	
-	bool inLoop = true;
-	int loopLen = 0;
+// Defining functions [
 
-	//Declaring variables from pointers
-	int &memArrSize = *memArrSizeP,
-		&charPos = *charPosP,
-		&pointerPos = *pointerPosP;
+// Creates a sub-loop [
+int callLoop() {
 
-	while(inLoop) {
+    bool inLoop = true;
+    int loopLen = 0;
+    
+    while(inLoop) {
 
-		int subLoopLen;
-		charPos++;
+        charPos++;
 
-		//Runs command based on the current character
-		switch(chars[charPos]) {
-			case '<':
-				pointerPos--;
-				loopLen++;
-				break;
-			case '>':
-				pointerPos++;
-				loopLen++;
-				break;
-			case '-':
-				memArr[pointerPos]--;
-				loopLen++;
-				break;
-			case '+':
-				memArr[pointerPos]++;
-				loopLen++;
-				break;
-			case '[':
-				subLoopLen = callLoop(chars, memArr, &memArrSize, &charPos, &pointerPos, timeDel); 
-				loopLen += subLoopLen+2;
-				break;
-			case ']':
-				if(memArr[pointerPos] > 0) {
-					charPos -= ++loopLen;
-					loopLen = 0;
-				}
-				else {
-					inLoop = false;
-					//cout << "not in loop" << endl;
-				}
-				break;
-			default:
-				break;
-		}
+        charConditional(&inLoop, &loopLen);
 
-		backendPrint(memArr, &memArrSize, &pointerPos);
+        backendPrint();
 
-		usleep(timeDel);
-	}
+        
+    }
 
-	return loopLen;
+    return loopLen;
 }
+// ] Creates a sub-loop
 
-void backendPrint(int *memArr, int *memArrSizeP, int *pointerPosP) {
+// Runs command based on the current character [
+void charConditional(bool *inLoopP, int *loopLenP) {
 
-	int &memArrSize = *memArrSizeP,
-		&pointerPos = *pointerPosP;
+    bool &inLoop = *inLoopP;
+    int &loopLen = *loopLenP, subLoopLen;
 
-	//Prints the whole memory array
+    switch(chars[charPos]) {
+        case '<':
+            pointerPos--;
+            if(inLoop) {loopLen++;}
+            break;
+        case '>':
+            pointerPos++;
+            if(inLoop) {loopLen++;}
+            break;
+        case '-':
+            memArr[pointerPos]--;
+            if(inLoop) {loopLen++;}
+            break;
+        case '+':
+            memArr[pointerPos]++;
+            if(inLoop) {loopLen++;}
+            break;
+        case '[':
+            subLoopLen = callLoop();
+            loopLen += subLoopLen+2;
+            break;
+        case ']':
+            if(memArr[pointerPos] > 0) {
+                charPos -= ++loopLen;
+                loopLen = 0;
+            }
+            else {
+                inLoop = false;
+            }
+            break;
+        //default:
+        //    break;
+    }
+}
+// ] Runs command based on the current character
+
+// Prints the backend of the brainfuck program [
+void backendPrint() {
+
+    // Prints the whole memory array [
 	for(int i=0; i<memArrSize; i++) {
 		cout << memArr[i] << " ";
 	}
 
-	cout << endl;
+    cout << endl;
+    // ] Prints the whole memory array
 
-	//Prints pointer position
+    // Prints pointer position [
 	for(int i=0; i<pointerPos; i++) {		
 
-		//Correction for multiple digit numbers
+		// Correction for multiple digit numbers [
 		for(int j=10; j<memArr[i]; j*= 10) {
 			cout << " ";
 		}
+        // ]
 
 		cout << "  ";
 	}
-
 	cout << "^" << endl;
+    // ] Prints pointer position
 }
+// ] Prints the backend of the brainfuck program
+
+// ] Defining functions
+
